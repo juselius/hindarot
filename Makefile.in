@@ -1,0 +1,38 @@
+#
+# $Id$
+#
+
+#DEBUG=1
+#PROF=1
+#RANGE=1
+#NOWARN=1
+
+topdir:=@top_srcdir@
+include $(topdir)/Config.mk
+
+PROGRAMS:=hindarot 
+LIBRARIES:=
+
+include $(topdir)/Rules.mk
+
+objs=param.o externals.o states.o boltzmann.o three_j.o basis.o eigen.o \
+hamiltonian.o deigen.o glue.o transition.o inout.o \
+keydef.o hindarot.o 
+
+src:=$(wildcard *.c *.h *.f *.f90)
+libs:=$(GETKW_LIBS) #$(LAPACK_LIBS) $(BLAS_LIBS) 
+
+all: $(PROGRAMS)
+
+hindarot: $(objs) 
+	$(F90) $(FLDFLAGS) -o $@ $+ $(libs)
+
+.PHONY: dep deps
+dep deps:
+	$(topdir)/config/mkdep90.py $(cdens_src) >deps.mk
+
+ifeq (, $(wildcard $(topdir)/deps.mk))
+$(shell $(topdir)/config/mkdep90.py $(cdens_src) >deps.mk)
+endif
+include $(topdir)/deps.mk
+

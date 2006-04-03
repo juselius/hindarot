@@ -1,0 +1,120 @@
+#
+# Config.mk.in
+# written by Jonas Juselius <jonas@iki.fi> Tue Dec  4 12:09:26 EET 2001
+#
+
+@SET_MAKE@
+
+SHELL:=@SHELL@
+
+host:=@host@
+host_os:=@host_os@
+host_cpu:=@host_cpu@
+host_vendor:=@host_vendor@
+
+CC:=@CC@
+F90:=@F90@
+CPP:=@CPP@
+CPPFLAGS:=@CPPFLAGS@
+
+LD:=@LD@
+RAN:=@RANLIB@
+STRIP:=@STRIP@
+AWK:=@AWK@
+AR:=@AR@
+ETAGS:=@ETAGS@
+CTAGS:=@CTAGS@
+LN_S:=@LN_S@
+YACC:=@YACC@
+LEX:=@LEX@
+LEXLIB:=@LEXLIB@
+
+INSTALL:=@INSTALL@
+INSTALL_DATA:=@INSTALL_DATA@
+INSTALL_SCRIPT:=@INSTALL_SCRIPT@
+INSTALL_PROGRAM:=@INSTALL_PROGRAM@
+mkinstalldirs=$(topdir)/config/mkinstalldirs
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+inst_bindir=@bindir@
+inst_libdir=@libdir@
+inst_includedir=@includedir@
+inst_datadir=@datadir@
+
+libdir:=@top_libdir@
+bindir:=@top_bindir@
+includedir:=@top_includedir@
+
+all_src:=$(wildcard *.f *.f90 *.c)
+all_objs:=$(addsuffix .o, $(basename $(all_src)))
+tag_src:=$(filter-out lex.yy.c, $(all_src))
+tag_src:=$(filter-out y.tab.c, $(tag_src))
+
+# search path used by make to find dependencies
+VPATH=$(includedir):$(libdir):$(bindir)
+
+ARCH=@host@
+
+BLAS_LIBS=@BLAS_LIBS@
+GETKW_LIBS=@GETKW_LIBS@
+
+#Fortran flags
+fopt:=@fopt@ 
+finclude:=@finclude@ 
+fwarn:=@fwarn@
+fdebug:=@fdebug@
+fprof:=@fprof@
+frange:=@frange@
+fldflags:=@fldflags@
+fdefs:=@fdefs@ @GETKW_INCLUDES@
+
+# C compiler flags
+copt:=@copt@
+cinclude:=@cinclude@
+cwarn:=@cwarn@
+cdebug:=@cdebug@
+cprof:=@cprof@
+crange:=@crange@
+cldflags:=@cldflags@
+cdefs:=@cdefs@
+
+ifdef DEBUG
+  CFLAGS+=$(cdebug) 
+  FFLAGS+=$(fdebug) 
+  bindir:=.
+else
+  CFLAGS+=$(copt) 
+  FFLAGS+=$(fopt) 
+endif
+
+CFLAGS+=$(cdefs) -I. -I$(topdir) -I$(includedir) $(cinclude)
+FFLAGS+=$(fdefs) -I. -I$(includedir) $(finclude)
+
+ifdef PROF
+  CFLAGS+=$(cprof)
+  FFLAGS+=$(fprof)
+  bindir:=.
+endif
+
+ifdef RANGE
+  FFLAGS+=$(frange)
+  CFLAGS+=$(crange)
+  bindir:=.
+endif
+
+ifndef NOWARN
+  FFLAGS+=$(fwarn)
+  CFLAGS+=$(cwarn)
+endif
+
+FLDFLAGS:=$(fldflags) -L. -L$(libdir)
+
+CLDFLAGS:=$(cldflags) -L. -L$(libdir)
+
+# remove extra whitespace
+FFLAGS:=$(strip $(FFLAGS))
+CFLAGS:=$(strip $(CFLAGS))
+FLDFLAGS:=$(strip $(FLDFLAGS))
+CLDFLAGS:=$(strip $(CLDFLAGS))
+
